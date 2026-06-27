@@ -147,6 +147,13 @@ local function apply_common_flags( target, info )
             "_UNICODE=1",
         })
     end
+
+    if is_clang( info ) then
+        local resource_dir = try { function() return os.iorunv("clang++", {"-print-resource-dir"}):trim() end }
+        if resource_dir then
+            f.cxflags({ "-resource-dir=" .. resource_dir })
+        end
+    end
 end
 
 
