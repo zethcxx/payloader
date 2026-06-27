@@ -1,0 +1,34 @@
+# xmake
+.xmake/
+xmake.out
+.xrepo/
+
+# buildir
+build/
+
+# utilities
+utils
+
+# ide/editors
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+
+.vs/
+*.sln
+*.vcxproj
+*.user
+
+.idea/
+cmake-build-*/
+
+
+# syncthing
+.stfolder/
+.stignore
+
+# misc
+.DS_Store
+Thumbs.db
+*.log
+
