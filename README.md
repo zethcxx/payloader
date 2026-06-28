@@ -115,7 +115,7 @@ A minimal PE runner:
 - `WaitForSingleObject` until completion
 
 > [!NOTE]
-> ~200kb are for \<print\>
+> ~200 KB of the generated executable size comes from \<print\>
 
 ---
 

