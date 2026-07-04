@@ -1,8 +1,10 @@
 module;
 
-export module utils;
+// ---------------------------------------------------------------------------------------------- //
+                                      export module utils;
+// ---------------------------------------------------------------------------------------------- //
 
-import lbyte.stx;
+import lbyte.stx ;
 import winstructs;
 
 using namespace lbyte::stx;
@@ -18,10 +20,10 @@ inline constexpr auto get_peb() {
 export [[nodiscard]]
 inline auto ldr_entry(ptr<LIST_ENTRY> links)
 {
-    return ptr<LDR_DATA_TABLE_ENTRY>{ links.addr() - 0x010 };
+    return links[-0x10, 1].as_p<LDR_DATA_TABLE_ENTRY>;
 }
 
-export template<usize N = 2> [[nodiscard]]
+export template<usize N> [[nodiscard]]
 inline auto module_entry(ptr<PEB> peb)
 {
     auto entry = peb->Ldr->InMemoryOrderModuleList.Flink;
@@ -31,12 +33,6 @@ inline auto module_entry(ptr<PEB> peb)
     return ldr_entry(entry);
 }
 
-
-export template<typename T> [[nodiscard]]
-inline auto container_of(ptr<LIST_ENTRY> member, usize offset)
-{
-    return ptr<T>{ member.as<uptr>() - offset };
-}
 
 export struct FnvHash
 {
@@ -50,7 +46,7 @@ export struct FnvHash
 
         template<ct::fixed_string str>
         [[nodiscard]] constexpr static auto static_hash() -> u32 {
-            u32 hash = BASIS;
+            auto hash = BASIS;
             for ( auto idx : range<usize>(str.size()) )
                 hash = update(hash, scast<u8>(str[idx]));
 
@@ -60,7 +56,7 @@ export struct FnvHash
     public:
 
         [[nodiscard]] inline static auto cstr(const u8* str, size_t size = 0) -> u32 {
-            u32 hash = BASIS;
+            auto hash = BASIS;
 
             if (size == 0)
                 while (*str)
