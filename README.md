@@ -148,7 +148,7 @@ xmake run loader
 ## Requirements
 
 - xmake >= 2.8.0
-- C++23 compiler (Clang 18+ / GCC 14+)
+- C++23 compiler (Clang 21+ / GCC 16+)
 - `llvm-objcopy` (or `objcopy` / `gobjcopy`)
 
 ---

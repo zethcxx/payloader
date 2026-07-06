@@ -1,10 +1,11 @@
-import utils     ;
-import winstructs;
-import lbyte.stx ;
+import lbyte.stx ; // Types --------
+import winstructs; // PE structs ---
+import utils     ; // Helpers ------
 
-using namespace lbyte::stx;
+using namespace lbyte::stx          ;
 using namespace lbyte::stx::literals;
 
+// idk
 #define let const auto
 
 extern "C" [[gnu::section(".payload"), gnu::used]]
@@ -12,15 +13,15 @@ auto payload() -> void
 {
     using WinExecSig = u32(const u8*, u32);
 
-    // -- PEB ---------------------------------------------------------------------------------------
-    // Using notepad.exe instead of calc.exe to ensure compatibility with my Wine testing environment.
+    // -- PEB --------------------------------------------------------------------------------------
+    // Use notepad.exe instead of calc.exe for compatibility with the default Wine environment.
     let cmd   = "notepad.exe\0"_vstr;
     let peb   = get_peb<win::PEB>();
 
-    // -- Kernel32 via InMemoryOrderModuleList  -----------------------------------------------------
+    // -- Resolve Kernel32 through InMemoryOrderModuleLis ------------------------------------------
     let ker32 = module_entry<2>( peb )->DllBase;
 
-    // -- PE headers -> Export Directory -----------------------------------------------------------
+    // -- Parse PE headers and locate the export directory -----------------------------------------
     let dos   = ker32[0].as_p<win::DOS_HEADER>();
 
     let nt    = ker32[dos->e_lfanew                                     ].as_p<win::NT_HEADERS64    >();
@@ -30,7 +31,7 @@ auto payload() -> void
     let names = ker32[exp->AddressOfNames       ].as_p<u32>();
     let ords  = ker32[exp->AddressOfNameOrdinals].as_p<u16>();
 
-    // -- Hash walk --------------------------------------------------------------------------------
+    // -- Walk the export table using API hashing --------------------------------------------------
     for ( let &&idx : range(exp->NumberOfNames) ) {
         let rva  = funcs[ords [idx].read<u16  >()].read<rva_s>();
         let name = ker32[names[idx].read<rva_s>()].as_p<u8   >();

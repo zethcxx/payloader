@@ -4,10 +4,10 @@ xmake.out
 .xrepo/
 
 # buildir
-build/
+/build/
 
 # utilities
-utils
+/utils/
 
 # ide/editors
 .vscode/

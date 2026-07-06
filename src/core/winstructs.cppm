@@ -1,4 +1,6 @@
-export module winstructs;
+// ---------------------------------------------------------------------------------------------- //
+                                   export module winstructs;
+// ---------------------------------------------------------------------------------------------- //
 
 import lbyte.stx;
 
@@ -6,7 +8,7 @@ using namespace lbyte::stx;
 
 export namespace win
 {
-    // --- Forward Declarations ---------------------------------
+    // -- Forward Declarations ---------------------------------------------------------------------
     struct PEB                        ;
     struct PEB_LDR_DATA               ;
     struct LDR_DATA_TABLE_ENTRY       ;
@@ -27,7 +29,7 @@ export namespace win
     };
 
 
-    // --- Thread Environment Block -----------------------------
+    // -- Thread Environment Block -----------------------------------------------------------------
     // x64: mov rax, gs:[0x30]  -> TEB self
     //      mov rax, gs:[0x60]  -> PEB (process environment block)
     struct TEB
@@ -47,7 +49,7 @@ export namespace win
     };
 
 
-    // --- Process Environment Block ---------------------------
+    // -- Process Environment Block ----------------------------------------------------------------
     // mov rax, gs:[0x60] -> PEB
     struct PEB
     {
@@ -122,7 +124,7 @@ export namespace win
     // ===========================================================
 
 
-    // --- IMAGE_DOS_HEADER ------------------------------------
+    // -- IMAGE_DOS_HEADER -------------------------------------------------------------------------
     struct DOS_HEADER
     {
         /* 0x000 */ u16       e_magic   ;   // "MZ"
@@ -147,7 +149,7 @@ export namespace win
     };
 
 
-    // --- IMAGE_FILE_HEADER -----------------------------------
+    // -- IMAGE_FILE_HEADER ------------------------------------------------------------------------
     struct FILE_HEADER
     {
         /* 0x000 */ u16      Machine             ;  // 0x8664 -> x64
@@ -160,14 +162,14 @@ export namespace win
     };
 
 
-    // --- IMAGE_DATA_DIRECTORY --------------------------------
+    // -- IMAGE_EXPORT_DIRECTORY -------------------------------------------------------------------
     struct DATA_DIRECTORY {
         /* 0x000 */ rva_s   VirtualAddress;   // RVA of directory
         /* 0x004 */ u32     Size          ;
     };
 
 
-    // --- IMAGE_OPTIONAL_HEADER64 -----------------------------
+    // -- IMAGE_OPTIONAL_HEADER64 ------------------------------------------------------------------
     struct OPTIONAL_HEADER64
     {
         /* 0x000 */ u16   Magic                      ; // 0x020B
@@ -204,7 +206,7 @@ export namespace win
     };
 
 
-    // --- IMAGE_NT_HEADERS64 ----------------------------------
+    // -- IMAGE_NT_HEADERS64 -----------------------------------------------------------------------
     struct NT_HEADERS64 {
         /* 0x000 */ u32               Signature     ;   // "PE\0\0"
         /* 0x004 */ FILE_HEADER       FileHeader    ;
@@ -212,7 +214,7 @@ export namespace win
     };
 
 
-    // --- IMAGE_EXPORT_DIRECTORY ------------------------------
+    // -- IMAGE_EXPORT_DIRECTORY -------------------------------------------------------------------
     struct EXPORT_DIRECTORY
     {
         /* 0x000 */ u32          Characteristics      ;
@@ -229,7 +231,7 @@ export namespace win
     };
 
 
-    // --- IMAGE_SECTION_HEADER --------------------------------
+    // -- IMAGE_SECTION_HEADER ---------------------------------------------------------------------
     struct SECTION_HEADER
     {
         /* 0x000 */ u8           Name[8]             ;

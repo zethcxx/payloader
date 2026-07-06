@@ -12,8 +12,8 @@ includes("./xmake/rules/*.lua")
 add_repositories("local-repo ./xmake/")
 add_moduledirs("./xmake/modules/")
 
-set_policy("build.c++.modules"    , true )
-set_policy("build.c++.modules.std", false)
+set_policy("build.c++.modules"    , true)
+set_policy("build.c++.modules.std", true)
 
 
 --: Rules -----------------------------------------------
@@ -45,7 +45,10 @@ target( "payload" )
 
     add_packages("lbyte.stx")
 
-    on_config( "actions.configure"   )
+    on_config(function(target)
+        import("actions").configure(target)
+        target:add("cxflags", "-falign-loops=1", "-falign-functions=1")
+    end)
     on_run   ( "actions.run_process" )
 
 

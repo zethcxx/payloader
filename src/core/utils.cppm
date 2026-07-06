@@ -1,5 +1,3 @@
-module;
-
 // ---------------------------------------------------------------------------------------------- //
                                       export module utils;
 // ---------------------------------------------------------------------------------------------- //
@@ -20,7 +18,7 @@ inline constexpr auto get_peb() {
 export [[nodiscard]]
 inline auto ldr_entry(ptr<LIST_ENTRY> links)
 {
-    return links[-0x10, 1].as_p<LDR_DATA_TABLE_ENTRY>;
+    return links[-0x10, 1].as_p<LDR_DATA_TABLE_ENTRY>();
 }
 
 export template<usize N> [[nodiscard]]
