@@ -21,7 +21,7 @@ add_rules("vscode.compile_commands")
 
 
 --: Deps ------------------------------------------------
-add_requires("lbyte.stx v0.2.0", {configs = {use_modules = true}})
+add_requires("lbyte.stx v0.2.1", {configs = {use_modules = true}})
 
 
 --: Targets ---------------------------------------------

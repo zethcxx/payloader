@@ -13,9 +13,7 @@ namespace vw = ranges::views;
 
 // -- Symmetric XOR transformation -----------------------------------------------------------------
 constexpr auto crypt(auto arr, auto key) {
-    const auto keystream = vw::repeat(key) | vw::join;
-
-    for ( auto &&[byte, mask] : vw::zip(arr, keystream) )
+    for ( auto &&[byte, mask] : vw::zip(arr, cycle(key)) )
         byte ^= mask;
 
     return arr;
